@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Календарь | Живая книга{% endblock %}
+
+{% block content %}
+<h1>Календарь мероприятий</h1>
+<p>Нажмите на название мероприятия, чтобы увидеть подробную информацию.</p>
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <button class="calendar-nav" onclick="changeMonth(-1)">← Предыдущий</button>
+        <span class="current-month" id="currentMonth"></span>
+        <button class="calendar-nav" onclick="changeMonth(1)">Следующий →</button>
+    </div>
+    <div id="calendar"></div>
+</div>
+
+<!-- Модальное окно -->
+<div id="eventModal" class="event-modal">
+    <div class="event-modal-content">
+        <span class="event-modal-close" onclick="closeEventModal()">&times;</span>
+        <div id="modalContent">
+            <div class="loading">Загрузка...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth();
+    const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    
+    function loadCalendar() {
+        document.getElementById('currentMonth').innerHTML = `${monthNames[currentMonth]} ${currentYear}`;
+        
+        fetch(`/api/calendar/${currentYear}/${currentMonth + 1}/`)
+            .then(response => response.json())
+            .then(events => {
+                renderCalendar(events);
+            })
+            .catch(error => console.error('Ошибка загрузки календаря:', error));
+    }
+    
+    function renderCalendar(events) {
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        let startDay = firstDay.getDay();
+        if (startDay === 0) {
+            startDay = 6;
+        } else {
+            startDay = startDay - 1;
+        }
+        
+        let html = '<table class="calendar-table">';
+        html += '<tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr>';
+        
+        let day = 1;
+        let rowCount = 0;
+        
+        // Первая строка
+        html += '<tr>';
+        for (let i = 0; i < startDay; i++) {
+            html += '<td class="empty-day"></td>';
+            rowCount++;
+        }
+        
+        // Заполняем дни месяца
+        while (day <= lastDay.getDate()) {
+            if (rowCount === 7) {
+                html += '</tr><tr>';
+                rowCount = 0;
+            }
+            
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dayEvents = events.filter(e => e.date === dateStr);
+            
+            let eventsHtml = '';
+            dayEvents.forEach(e => {
+                let shortTitle = e.title.length > 12 ? e.title.substring(0, 12) + '...' : e.title;
+                eventsHtml += `<div class="event-indicator" onclick="showEventModal(${e.id})">📖 ${shortTitle}</div>`;
+            });
+            
+            html += `<td><div class="calendar-day-number">${day}</div>${eventsHtml}</td>`;
+            
+            day++;
+            rowCount++;
+        }
+        
+        // Заполняем оставшиеся ячейки в последней строке
+        while (rowCount < 7 && rowCount !== 0) {
+            html += '<td class="empty-day"></td>';
+            rowCount++;
+        }
+        
+        html += '</tr></table>';
+        document.getElementById('calendar').innerHTML = html;
+    }
+    
+    function showEventModal(eventId) {
+        const modal = document.getElementById('eventModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        modalContent.innerHTML = '<div class="loading">Загрузка...</div>';
+        modal.style.display = 'flex';
+        
+        fetch(`/api/event/${eventId}/`)
+            .then(response => response.json())
+            .then(eventData => {
+                modalContent.innerHTML = `
+                    <h3>${eventData.title}</h3>
+                    <div class="event-modal-info">
+                        <p><i class="fas fa-calendar-alt"></i> <strong>Дата:</strong> ${eventData.date}</p>
+                        <p><i class="fas fa-clock"></i> <strong>Время:</strong> ${eventData.time}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Место:</strong> ${eventData.location}</p>
+                        <p><i class="fas fa-align-left"></i> <strong>Описание:</strong> ${eventData.description || 'Описание отсутствует'}</p>
+                    </div>
+                    <div class="event-modal-badge">
+                        <i class="fas ${eventData.recurring ? 'fa-repeat' : 'fa-calendar-day'}"></i>
+                        ${eventData.recurring ? 'Регулярное мероприятие' : 'Разовое мероприятие'}
+                    </div>
+                    <form method="post" action="/event/${eventData.id}/register/" style="margin-top: 1rem;">
+                        {% csrf_token %}
+                        <button type="submit" class="register-btn" style="margin-top: 0;">Записаться</button>
+                    </form>
+                `;
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                modalContent.innerHTML = '<p>Ошибка загрузки данных</p>';
+            });
+    }
+    
+    function closeEventModal() {
+        document.getElementById('eventModal').style.display = 'none';
+    }
+    
+    function changeMonth(delta) {
+        currentMonth += delta;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        } else if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        loadCalendar();
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadCalendar);
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('eventModal');
+        if (event.target === modal) {
+            closeEventModal();
+        }
+    }
+</script>
+{% endblock %}

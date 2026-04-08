@@ -1,0 +1,17 @@
+# Django и основные зависимости
+Django==4.2.11
+asgiref==3.8.1
+sqlparse==0.5.1
+tzdata==2024.1
+
+# Работа с изображениями
+Pillow==10.3.0
+
+# Отправка email (опционально)
+# django-anymail==10.3
+
+# Для работы с PostgreSQL (если перейдете с SQLite)
+# psycopg2-binary==2.9.9
+
+# Для работы с переменными окружения
+# python-dotenv==1.0.1

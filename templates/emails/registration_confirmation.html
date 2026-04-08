@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #F5FBF7; margin: 0; padding: 20px; }
+        .email-container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; }
+        .email-header { background: linear-gradient(135deg, #2F6B47, #1E4A32); padding: 20px; text-align: center; color: white; }
+        .email-body { padding: 30px; }
+        .event-details { background: #E8F3ED; padding: 15px; border-radius: 12px; margin: 20px 0; }
+        .btn { background: #2F6B47; color: white; padding: 10px 20px; text-decoration: none; border-radius: 30px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Живая книга</h1>
+        </div>
+        <div class="email-body">
+            <h2>Здравствуйте, {{ user.username }}!</h2>
+            <p>Вы успешно записаны на мероприятие:</p>
+            <div class="event-details">
+                <p><strong>{{ event.title }}</strong></p>
+                <p> Дата: {{ date }}</p>
+                <p> Время: {{ time }}</p>
+                <p> Место: {{ event.location }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

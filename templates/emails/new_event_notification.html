@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background-color: #F5FBF7;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(47, 107, 71, 0.08);
+        }
+        .email-header {
+            background: linear-gradient(135deg, #2F6B47 0%, #1E4A32 100%);
+            padding: 30px;
+            text-align: center;
+        }
+        .email-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .email-body {
+            padding: 30px;
+        }
+        .event-details {
+            background: #E8F3ED;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+        .event-details p {
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .event-details i {
+            width: 24px;
+            color: #2F6B47;
+        }
+        .event-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1E4A32;
+            margin-bottom: 15px;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #2F6B47 0%, #1E4A32 100%);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 40px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        .footer {
+            background: #E8F3ED;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #4A6B58;
+        }
+        .unsubscribe {
+            margin-top: 10px;
+            font-size: 11px;
+        }
+        .unsubscribe a {
+            color: #2F6B47;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>📚 Живая книга</h1>
+        </div>
+        <div class="email-body">
+            <h2>Новое мероприятие!</h2>
+            <p>Дорогой читатель, мы рады сообщить вам о новом мероприятии в библиотеке:</p>
+            
+            <div class="event-details">
+                <div class="event-title">{{ event.title }}</div>
+                <p><i class="fas fa-calendar-alt"></i> <strong>Дата:</strong> {{ date }}</p>
+                <p><i class="fas fa-clock"></i> <strong>Время:</strong> {{ time }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> <strong>Место:</strong> {{ event.location }}</p>
+                <p><i class="fas fa-align-left"></i> <strong>Описание:</strong> {{ event.description|truncatechars:200 }}</p>
+            </div>
+            
+            <p>Не пропустите интересное событие! Записывайтесь прямо сейчас.</p>
+            
+            
+            <div class="unsubscribe">
+                <p>Вы получили это письмо, потому что подписаны на новостную рассылку.<br>
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2026 Проект "Живая книга" для ЦБС г. Димитровграда</p>
+        </div>
+    </div>
+</body>
+</html>

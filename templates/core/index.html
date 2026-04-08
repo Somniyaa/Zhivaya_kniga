@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная | Живая книга{% endblock %}
+
+{% block content %}
+<h1>Ближайшие мероприятия</h1>
+
+{% if events %}
+    <div class="event-grid">
+        {% for event in events %}
+        <div class="event-card">
+            <div class="event-date">
+                <i class="fas fa-calendar-alt"></i> {{ event.date|date:"j E" }} ({{ event.date|date:"l" }}) • {{ event.time|default:"время уточняется" }}
+            </div>
+            <div class="event-title" onclick="showEventModal({{ event.id }})">
+                {{ event.title }}
+            </div>
+            <div class="event-info">
+                <i class="fas fa-map-marker-alt"></i> {{ event.location }}
+            </div>
+            <div class="event-description">
+                {{ event.description|truncatechars:120 }}
+            </div>
+            <div class="event-badge">
+                <i class="fas {% if event.schedule == 'Регулярное мероприятие' %}fa-repeat{% else %}fa-calendar-day{% endif %}"></i>
+                {{ event.schedule }}
+            </div>
+            
+            {% if user.is_authenticated %}
+                {% if event.is_registered %}
+                    <button class="register-btn registered" disabled>✓ Вы записаны</button>
+                {% else %}
+                    <form method="post" action="{% url 'register_event' event.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="register-btn">Записаться</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'login' %}" class="register-btn">Записаться</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Пока нет запланированных мероприятий.</p>
+    </div>
+{% endif %}
+
+<!-- Модальное окно -->
+<div id="eventModal" class="event-modal">
+    <div class="event-modal-content">
+        <span class="event-modal-close" onclick="closeEventModal()">&times;</span>
+        <div id="modalContent">
+            <div class="loading">Загрузка...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Красивая форма подписки -->
+<section class="subscribe-box">
+    <div class="subscribe-icon">
+        <i class="fas fa-envelope-open-text"></i>
+    </div>
+    <h2>Будьте в курсе событий</h2>
+    <p>Подпишитесь на рассылку и получайте уведомления о новых мероприятиях первыми</p>
+    <form method="post" action="{% url 'subscribe' %}" class="subscribe-form">
+        {% csrf_token %}
+        <div class="subscribe-input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" name="email" placeholder="Ваш email" required>
+            <button type="submit">Подписаться</button>
+        </div>
+    </form>
+</section>
+
+<script>
+    function showEventModal(eventId) {
+        const modal = document.getElementById('eventModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        modalContent.innerHTML = '<div class="loading">Загрузка...</div>';
+        modal.style.display = 'flex';
+        
+        fetch(`/api/event/${eventId}/`)
+            .then(response => response.json())
+            .then(event => {
+                modalContent.innerHTML = `
+                    <h3>${event.title}</h3>
+                    <div class="event-modal-info">
+                        <p><i class="fas fa-calendar-alt"></i> <strong>Дата:</strong> ${event.date}</p>
+                        <p><i class="fas fa-clock"></i> <strong>Время:</strong> ${event.time}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Место:</strong> ${event.location}</p>
+                        <p><i class="fas fa-align-left"></i> <strong>Описание:</strong> ${event.description || 'Описание отсутствует'}</p>
+                    </div>
+                    <div class="event-modal-badge">
+                        <i class="fas ${event.recurring ? 'fa-repeat' : 'fa-calendar-day'}"></i>
+                        ${event.recurring ? 'Регулярное мероприятие' : 'Разовое мероприятие'}
+                    </div>
+                    <form method="post" action="/event/${event.id}/register/" style="margin-top: 1rem;">
+                        {% csrf_token %}
+                        <button type="submit" class="register-btn" style="margin-top: 0;">Записаться</button>
+                    </form>
+                `;
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                modalContent.innerHTML = '<p>Ошибка загрузки данных</p>';
+            });
+    }
+    
+    function closeEventModal() {
+        document.getElementById('eventModal').style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('eventModal');
+        if (event.target === modal) {
+            closeEventModal();
+        }
+    }
+</script>
+
+<style>
+    .subscribe-box {
+        background: linear-gradient(135deg, var(--primary-soft) 0%, var(--secondary-light) 100%);
+        border-radius: 32px;
+        padding: 2.5rem;
+        margin: 3rem 0;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(47, 107, 71, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .subscribe-box::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(139, 195, 74, 0.1) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    
+    .subscribe-icon {
+        width: 70px;
+        height: 70px;
+        background: var(--surface);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .subscribe-icon i {
+        font-size: 2rem;
+        color: var(--primary);
+    }
+    
+    .subscribe-box h2 {
+        color: var(--primary);
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .subscribe-box p {
+        color: var(--text-light);
+        margin-bottom: 2rem;
+        font-size: 1rem;
+    }
+    
+    .subscribe-input-group {
+        display: flex;
+        align-items: center;
+        max-width: 550px;
+        margin: 0 auto;
+        background: var(--surface);
+        border-radius: 60px;
+        padding: 0.3rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .subscribe-input-group:focus-within {
+        box-shadow: 0 8px 25px rgba(47, 107, 71, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .subscribe-input-group i {
+        color: var(--text-light);
+        font-size: 1.2rem;
+        margin-left: 1.2rem;
+    }
+    
+    .subscribe-input-group input {
+        flex: 1;
+        padding: 0.9rem 1rem;
+        border: none;
+        background: transparent;
+        font-size: 1rem;
+        font-family: inherit;
+        outline: none;
+        color: var(--text);
+    }
+    
+    .subscribe-input-group input::placeholder {
+        color: var(--text-light);
+        opacity: 0.6;
+    }
+    
+    .subscribe-input-group button {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.8rem;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+    
+    .subscribe-input-group button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(47, 107, 71, 0.3);
+    }
+    
+    .subscribe-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+    
+    .subscribe-note i {
+        font-size: 0.7rem;
+    }
+    
+    @media (max-width: 768px) {
+        .subscribe-box {
+            padding: 1.5rem;
+        }
+        
+        .subscribe-input-group {
+            flex-direction: column;
+            background: transparent;
+            box-shadow: none;
+            gap: 0.8rem;
+        }
+        
+        .subscribe-input-group i {
+            display: none;
+        }
+        
+        .subscribe-input-group input {
+            background: var(--surface);
+            border-radius: 50px;
+            padding: 0.9rem 1.2rem;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .subscribe-input-group button {
+            width: 100%;
+            justify-content: center;
+            padding: 0.9rem;
+        }
+        
+        .subscribe-box h2 {
+            font-size: 1.4rem;
+        }
+    }
+</style>
+{% endblock %}

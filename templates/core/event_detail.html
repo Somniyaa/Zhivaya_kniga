@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event.title }} | Живая книга{% endblock %}
+
+{% block content %}
+<div class="event-detail-page">
+    <div class="event-detail-card">
+        <h1>{{ event.title }}</h1>
+        
+        <div class="event-detail-info">
+            <div class="info-row">
+                <strong>📅 Дата:</strong> {{ next_date|date:"j E Y" }} ({{ next_date|date:"l" }})
+            </div>
+            <div class="info-row">
+                <strong>⏰ Время:</strong> {{ event.time|default:"уточняется" }}
+            </div>
+            {% if event.schedule_text %}
+            <div class="info-row">
+                <strong>🕒 Расписание:</strong> {{ event.schedule_text }}
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <strong>📍 Место:</strong> {{ event.location }}
+            </div>
+            <div class="info-row">
+                <strong>🏷️ Тип:</strong> {{ event.get_type_display_ru }}
+            </div>
+        </div>
+        
+        <div class="event-description">
+            <h3>Описание</h3>
+            <p>{{ event.description }}</p>
+        </div>
+        
+        <div class="event-actions">
+            {% if user.is_authenticated %}
+                {% if is_registered %}
+                    <form method="post" action="{% url 'cancel_registration' event.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-cancel">Отменить запись</button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'register_event' event.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-primary">Записаться</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-primary">Войдите, чтобы записаться</a>
+            {% endif %}
+            
+            <a href="{% url 'calendar' %}" class="btn-secondary">← Вернуться к календарю</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

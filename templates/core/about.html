@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}О библиотеке | Живая книга{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-content {
+        background: var(--surface);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+    }
+    
+    .stats {
+        display: flex;
+        gap: 2rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+    
+    .stat-item {
+        background: var(--primary-soft);
+        padding: 1.5rem;
+        border-radius: 20px;
+        text-align: center;
+        flex: 1;
+        min-width: 150px;
+        transition: transform 0.3s;
+        border-bottom: 3px solid var(--secondary);
+    }
+    
+    .stat-item:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary);
+    }
+    
+    .map-container {
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        margin: 2rem 0;
+    }
+    
+    .contacts {
+        background: var(--surface);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: var(--shadow);
+    }
+    
+    .contacts h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+    
+    .contacts ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .contacts li {
+        padding: 0.8rem;
+        border-bottom: 1px solid var(--primary-soft);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .contacts li i {
+        color: var(--secondary);
+        width: 24px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>О библиотеке</h1>
+
+<div class="about-content">
+    <div class="about-text">
+        <p><strong>Централизованная библиотечная система г. Димитровграда</strong> – это не просто хранилище книг, а настоящий культурный центр города. Мы объединяем несколько библиотек и постоянно работаем над тем, чтобы чтение стало модным и увлекательным занятием для всех возрастов.</p>
+        
+        <p>Проект <strong>«Живая книга»</strong> родился как идея превратить библиотеку в живой организм, где каждая книга может «заговорить» голосом автора, читателя или критика. Мы организуем встречи с писателями, мастер-классы, книжные клубы и интерактивные чтения.</p>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">15 000+</div>
+                <div>Читателей</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50 000+</div>
+                <div>Книг в фонде</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100+</div>
+                <div>Мероприятий в год</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2>Наши филиалы</h2>
+<div class="map-container" id="map" style="height: 500px;"></div>
+
+<div class="contacts">
+    <h3>Адреса филиалов:</h3>
+    <ul>
+        <li><i class="fas fa-building"></i> <strong>Центральная городская библиотека</strong> – ул. Западная, д.7</li>
+        <li><i class="fas fa-child"></i> <strong>Центральная городская детская библиотека</strong> – ул. Западная, д.5</li>
+        <li><i class="fas fa-gamepad"></i> <strong>Библиотека «Информационно-досуговый центр»</strong> – ул. Черемшанская, д.114</li>
+        <li><i class="fas fa-home"></i> <strong>Библиотека семейного чтения им. А. С. Неверова</strong> – ул. Куйбышева, д.144</li>
+        <li><i class="fas fa-flag-checkered"></i> <strong>Историко-патриотический отдел БСЧ</strong> – ул. Куйбышева, д.247</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    ymaps.ready(init);
+    
+    function init() {
+        // Центр города Димитровград
+        var map = new ymaps.Map("map", {
+            center: [54.213, 49.618],
+            zoom: 14,
+            controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
+        });
+        
+        // Правильные координаты филиалов библиотек
+        var locations = [
+            {
+                coords: [54.205594, 49.600730],
+                name: "Центральная городская библиотека",
+                address: "ул. Западная, д.7",
+                icon: "building"
+            },
+            {
+                coords: [54.205399, 49.600505],
+                name: "Центральная городская детская библиотека",
+                address: "ул. Западная, д.5",
+                icon: "child"
+            },
+            {
+                coords: [54.215741, 49.652760],
+                name: "Библиотека «Информационно-досуговый центр»",
+                address: "ул. Черемшанская, д.114",
+                icon: "gamepad"
+            },
+            {
+                coords: [54.212419, 49.624032],
+                name: "Библиотека семейного чтения им. А. С. Неверова",
+                address: "ул. Куйбышева, д.144",
+                icon: "home"
+            },
+            {
+                coords: [54.227296, 49.613387],
+                name: "Историко-патриотический отдел БСЧ",
+                address: "ул. Куйбышева, д.247",
+                icon: "flag-checkered"
+            }
+        ];
+        
+        // Добавляем метки на карту
+        locations.forEach(function(loc) {
+            var placemark = new ymaps.Placemark(loc.coords, {
+                balloonContentHeader: `<strong>${loc.name}</strong>`,
+                balloonContentBody: `
+                    <div style="margin: 10px 0;">
+                        <i class="fas fa-map-marker-alt"></i> ${loc.address}<br>
+                        <i class="fas fa-clock"></i> Пн-Пт: 9:00-19:00<br>
+                        <i class="fas fa-clock"></i> Сб: 10:00-17:00
+                    </div>
+                `,
+                hintContent: loc.name
+            }, {
+                preset: 'islands#greenDotIcon',
+                iconColor: '#2F6B47',
+                balloonCloseButton: true,
+                openBalloonOnClick: true
+            });
+            map.geoObjects.add(placemark);
+        });
+        
+        // Добавляем масштабирование колесиком мыши
+        map.behaviors.enable('scrollZoom');
+        
+        // Добавляем кнопку для центрирования карты
+        map.controls.add('zoomControl', { top: 10, right: 10 });
+    }
+</script>
+{% endblock %}

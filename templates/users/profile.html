@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мой профиль | Живая книга{% endblock %}
+
+{% block content %}
+<h1>Мой профиль</h1>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="avatar">
+            {% if profile.avatar and profile.avatar.url %}
+                <img src="{{ profile.avatar.url }}" alt="{{ user.username }}">
+            {% else %}
+                <i class="fas fa-user-circle"></i>
+            {% endif %}
+        </div>
+        <div class="profile-name">{{ user.first_name|default:user.username }}</div>
+        <div class="profile-email">{% if user.email %}{{ user.email }}{% else %}Email не указан{% endif %}</div>
+        {% if profile.phone %}
+            <div class="profile-phone">{{ profile.phone }}</div>
+        {% endif %}
+        <a href="{% url 'edit_profile' %}" class="edit-profile-btn">Редактировать</a>
+    </div>
+    
+    <div class="registered-events">
+        <h2>Мои мероприятия</h2>
+        {% if events %}
+            {% for event in events %}
+            <div class="registered-event-card">
+                <div class="event-info-compact">
+                    <h4>{{ event.title }}</h4>
+                    <p><i class="fas fa-calendar-alt"></i> {{ event.date|date:"j E Y" }}</p>
+                    <p><i class="fas fa-clock"></i> {{ event.time }}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ event.location }}</p>
+                </div>
+                <form method="post" action="{% url 'cancel_registration' event.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="cancel-btn">Отменить</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-events">
+                <p>Вы ещё не записаны ни на одно мероприятие</p>
+                <a href="{% url 'calendar' %}" class="register-btn" style="display: inline-block; margin-top: 1rem;">Посмотреть календарь</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .profile-container {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .profile-card {
+        background: var(--surface);
+        border-radius: 24px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(139, 195, 74, 0.2);
+    }
+    
+    .avatar {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-soft), var(--secondary-light));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 3px solid var(--secondary);
+    }
+    
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .avatar i {
+        font-size: 3.5rem;
+        color: var(--primary);
+    }
+    
+    .profile-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-email, .profile-phone {
+        color: var(--text-light);
+        margin: 0.3rem 0;
+        font-size: 0.9rem;
+    }
+    
+    .edit-profile-btn {
+        display: inline-block;
+        background: var(--primary-soft);
+        color: var(--primary);
+        text-decoration: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 40px;
+        margin-top: 1rem;
+        transition: all 0.3s;
+    }
+    
+    .edit-profile-btn:hover {
+        background: var(--secondary-light);
+        transform: translateY(-2px);
+    }
+    
+    .registered-events {
+        background: var(--surface);
+        border-radius: 24px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(139, 195, 74, 0.2);
+    }
+    
+    .registered-events h2 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        font-size: 1.3rem;
+    }
+    
+    .registered-event-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--primary-soft);
+        transition: background 0.3s;
+        border-radius: 12px;
+    }
+    
+    .registered-event-card:hover {
+        background: var(--primary-soft);
+    }
+    
+    .event-info-compact {
+        flex: 1;
+    }
+    
+    .event-info-compact h4 {
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .event-info-compact p {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin: 0.3rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .event-info-compact i {
+        width: 20px;
+        color: var(--secondary);
+    }
+    
+    .cancel-btn {
+        background: var(--error);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.85rem;
+    }
+    
+    .cancel-btn:hover {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+    
+    .empty-events {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-light);
+    }
+    
+    @media (max-width: 768px) {
+        .profile-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

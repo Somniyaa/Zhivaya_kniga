@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Результаты: {{ quiz.title }} | Живая книга{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    <div class="result-card">
+        <h1>{{ quiz.title }}</h1>
+        
+        <div class="result-score">
+            <div class="score-number">{{ result.score }} / {{ result.total }}</div>
+            <div class="score-percentage">{{ result.score|div:result.total|multiply:100|floatformat:0 }}%</div>
+        </div>
+        
+        {% if result.score|div:result.total >= 0.7 %}
+            <div class="result-message success">
+                🎉 Отлично! Вы настоящий знаток литературы!
+            </div>
+        {% else %}
+            <div class="result-message warning">
+                📖 Попробуйте ещё раз! Прочитайте книги и возвращайтесь!
+            </div>
+        {% endif %}
+        
+        <div class="result-actions">
+            <a href="{% url 'quizzes_list' %}" class="btn-primary">К списку викторин</a>
+            <a href="{% url 'index' %}" class="btn-secondary">На главную</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Литературные викторины | Живая книга{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quizzes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .quiz-card {
+        background: var(--surface);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: all 0.3s;
+        border: 1px solid rgba(139, 195, 74, 0.2);
+    }
+    
+    .quiz-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+    
+    .quiz-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .quiz-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .quiz-body {
+        padding: 1.5rem;
+    }
+    
+    .quiz-description {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .quiz-stats {
+        display: flex;
+        justify-content: space-between;
+        color: var(--primary);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
+        border-top: 1px solid var(--primary-soft);
+        border-bottom: 1px solid var(--primary-soft);
+    }
+    
+    .quiz-btn {
+        background: var(--gradient-secondary);
+        color: white;
+        border: none;
+        padding: 0.8rem;
+        border-radius: 40px;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        display: block;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .quiz-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(139, 195, 74, 0.4);
+    }
+    
+    .quiz-btn.completed {
+        background: var(--text-light);
+        cursor: pointer;
+    }
+    
+    .quiz-btn.completed:hover {
+        background: var(--gradient-secondary);
+        transform: translateY(-2px);
+    }
+    
+    .completed-badge {
+        background: var(--success);
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Литературные викторины</h1>
+<p>Проверьте свои знания о книгах, сказках и литературных героях!</p>
+
+<div class="quizzes-grid">
+    {% for quiz in quizzes %}
+    <div class="quiz-card">
+        <div class="quiz-header">
+            <h3><i class="fas fa-book-open"></i> {{ quiz.title }}</h3>
+        </div>
+        <div class="quiz-body">
+            <div class="quiz-description">{{ quiz.description }}</div>
+            <div class="quiz-stats">
+                <span><i class="fas fa-question-circle"></i> {{ quiz.questions.count }} вопросов</span>
+                {% if quiz.id in completed_quizzes %}
+                    <span class="completed-badge"><i class="fas fa-check-circle"></i> Пройдена</span>
+                {% else %}
+                    <span><i class="fas fa-gem"></i> Доступна</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'quiz_detail' quiz.id %}" class="quiz-btn {% if quiz.id in completed_quizzes %}completed{% endif %}">
+                {% if quiz.id in completed_quizzes %}
+                    <i class="fas fa-redo-alt"></i> Пройти ещё раз
+                {% else %}
+                    <i class="fas fa-play"></i> Начать викторину
+                {% endif %}
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <i class="fas fa-puzzle-piece"></i>
+        <p>Викторины пока не добавлены</p>
+        <p>Зайдите в админ-панель и добавьте викторины</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Живая книга{% endblock %}</title>
+    {% load static %}
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш-ключ-API&lang=ru_RU"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{% url 'index' %}">
+                <i class="fas fa-book"></i>
+                Живая <span>Книга</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Главная</a></li>
+                <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">О библиотеке</a></li>
+                <li><a href="{% url 'calendar' %}" class="{% if request.resolver_match.url_name == 'calendar' %}active{% endif %}">Календарь</a></li>
+                <li><a href="{% url 'quizzes_list' %}" class="{% if 'quizzes' in request.path %}active{% endif %}">Викторины</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Профиль</a></li>
+                    <li><a href="{% url 'logout' %}">Выйти</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Войти</a></li>
+                    <li><a href="{% url 'register' %}">Регистрация</a></li>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'admin:index' %}">Админ</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Живая книга</h4>
+                <p>Проект для продвижения культуры чтения в г. Димитровграде</p>
+            </div>
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <p>8 (84235) 5-25-25</p>
+                <p>8 (84235) 5-27-46</p>
+                <p>cbsdgrad@mail.ru</p>
+                <p>г. Димитровград, ул. Западная, д. 7</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Проект "Живая книга" для ЦБС г. Димитровграда</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
